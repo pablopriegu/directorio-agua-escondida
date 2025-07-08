@@ -26,7 +26,6 @@ SECRET_KEY = 'django-insecure-^v6i%!6eu2d#^vdqswpcbj9)7ilqq$h7a5$=n)bes-5qx@#jz@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1').split(',')
 
 
 # Application definition
@@ -126,9 +125,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'directorio_api.User'
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-]
 
 # Configuración de Django REST Framework
 REST_FRAMEWORK = {
@@ -136,3 +132,19 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
+# settings.py - AL FINAL DEL ARCHIVO
+
+# Configuración para producción en Render
+if 'RENDER' in os.environ:
+    # Permite conexiones desde el dominio del backend y del frontend
+    ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
+
+    # Orígenes permitidos para CORS (el frontend)
+    CORS_ALLOWED_ORIGINS = [os.environ.get('CORS_ALLOWED_ORIGINS')]
+
+    # Usa la base de datos de Render
+    DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+
+    # Configuración para archivos estáticos
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
